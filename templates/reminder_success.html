@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder Verification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+            margin: 20px;
+        }
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+        .error-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+        .warning-icon {
+            font-size: 4rem;
+            color: #ffc107;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        .message {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .success { border-left: 5px solid #28a745; }
+        .error { border-left: 5px solid #dc3545; }
+        .warning { border-left: 5px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container {{ status }}">
+        {% if status == 'success' %}
+            <div class="success-icon">✅</div>
+            <h1>Email Verified Successfully!</h1>
+            <p class="message">
+                {{ message }}<br><br>
+                Your reminder has been activated. You will receive an email notification 
+                when your desired class becomes available.
+            </p>
+            <a href="https://booking.bbdc.sg" class="button">Go to BBDC Booking</a>
+        
+        {% elif status == 'error' %}
+            <div class="error-icon">❌</div>
+            <h1>Verification Failed</h1>
+            <p class="message">
+                {{ message }}<br><br>
+                This verification link may have expired or is invalid. 
+                Please try setting up your reminder again.
+            </p>
+            <a href="{{ frontend_url }}" class="button">Try Again</a>
+        
+        {% elif status == 'already_verified' %}
+            <div class="warning-icon">⚠️</div>
+            <h1>Already Verified</h1>
+            <p class="message">
+                {{ message }}<br><br>
+                Your reminder is already active and working. 
+                You don't need to verify it again.
+            </p>
+            <a href="https://booking.bbdc.sg" class="button">Go to BBDC Booking</a>
+        
+        {% else %}
+            <div class="error-icon">❌</div>
+            <h1>Unknown Status</h1>
+            <p class="message">
+                Something went wrong. Please try again or contact support.
+            </p>
+            <a href="{{ frontend_url }}" class="button">Go Back</a>
+        {% endif %}
+    </div>
+</body>
+</html>
