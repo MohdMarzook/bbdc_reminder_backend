@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 template = Jinja2Templates(directory="templates")
+from sqlalchemy import text
 
 models.base.metadata.create_all(bind=engine)
 FRONT_END_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
@@ -194,7 +195,11 @@ async def read_root():
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
-
+    
+@app.get("/keep-alive")
+async def keep_alive(db=Depends(get_db)):
+    response = db.execute(text("SELECT 1"))
+    return {"status": response}
 
 @app.post("/api/login")
 async def first_login(login_request: LoginRequest, db: dict = Depends(get_db)):
