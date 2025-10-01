@@ -9,3 +9,6 @@ jobs:
     steps:
       - name: Ping the /keep-alive route
         run: curl -s "https://bbdc-reminder-backend.onrender.com/keep-alive" > /dev/null
+    steps:
+      - name: Ping the /root route
+        run: curl -s "https://bbdc-reminder-backend.onrender.com/" > /dev/null
