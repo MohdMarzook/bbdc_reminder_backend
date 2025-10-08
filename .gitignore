@@ -33,3 +33,9 @@ out/
 *.swp
 *.bak
 *.tmp
+
+get_token.py
+z_redis.py
+z_mail.py
+credentials.json
+token.json

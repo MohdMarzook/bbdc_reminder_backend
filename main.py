@@ -61,10 +61,13 @@ class ReminderRequest(BaseModel):
 async def lifespan(app: FastAPI):
     app.state.redis_pool = await redis.get_redis_connection()
     app.state.checker_task = asyncio.create_task(checker())
+    app.state.keep_alive_task = asyncio.create_task(keep_alive_mail())
     yield
     await app.state.redis_pool.disconnect()
     app.state.checker_task.cancel()
     await app.state.checker_task
+    app.state.keep_alive_task.cancel()
+    await app.state.keep_alive_task
 
 app = FastAPI(lifespan=lifespan)
 
@@ -94,7 +97,56 @@ def update_token_db(username, auth_token, jsessionid, db):
         return new_data.get("auth_token"), new_data.get("jsessionid")
     return False
 
-
+async def keep_alive_mail():
+    while True:
+        try: 
+            load_dotenv()
+            time_interval = int(os.getenv("KEEP_ALIVE_EMAIL_INTERVAL", 518400))
+            admin_email = os.getenv("ADMIN_EMAIL")
+            
+            if not admin_email:
+                print("ADMIN_EMAIL not configured, skipping keep-alive email")
+                await asyncio.sleep(3600)  
+                continue
+            
+            print(f"Sending keep-alive email to {admin_email} at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            
+            email_body = f"""
+            <html>
+            <body>
+                <h2>Keep-Alive Email</h2>
+                <p>This is an automated keep-alive email to ensure the email service is functioning properly.</p>
+                
+                <h3>System Status:</h3>
+                <ul>
+                    <li>Email Service: ✅ Working</li>
+                    <li>Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}</li>
+                    <li>Next email in: {time_interval // 86400} days</li>
+                </ul>
+                
+                <p><em>This email was sent automatically by the BBDC Reminder Service.</em></p>
+            </body>
+            </html>
+            """
+            
+            success = await send_mail.send_email(
+                to_email=admin_email,
+                subject="Keep-Alive Email - BBDC Reminder Service",
+                message=email_body
+            )
+            
+            if success:
+                print(f"Keep-alive email sent successfully, sleeping for {time_interval} seconds ({time_interval // 86400} days)...")
+            else:
+                print("Failed to send keep-alive email")
+                
+            await asyncio.sleep(time_interval)
+            
+        except Exception as e:
+            print(f"Error in keep-alive mail: {e}")
+            await asyncio.sleep(30)
+            
 async def checker():
 
     while True:
