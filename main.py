@@ -120,7 +120,7 @@ async def keep_alive_mail():
                 
                 <h3>System Status:</h3>
                 <ul>
-                    <li>Email Service: ✅ Working</li>
+                    <li>Email Service: Working 👍</li>
                     <li>Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}</li>
                     <li>Next email in: {time_interval // 86400} days</li>
                 </ul>
@@ -130,13 +130,13 @@ async def keep_alive_mail():
             </html>
             """
             
-            success = await send_mail.send_email(
+            success = send_mail.send_email_via_api(
                 to_email=admin_email,
                 subject="Keep-Alive Email - BBDC Reminder Service",
-                message=email_body
+                html_body=email_body
             )
-            
-            if success:
+
+            if success.get("labelIds")[0] == "SENT":
                 print(f"Keep-alive email sent successfully, sleeping for {time_interval} seconds ({time_interval // 86400} days)...")
             else:
                 print("Failed to send keep-alive email")
@@ -145,8 +145,8 @@ async def keep_alive_mail():
             
         except Exception as e:
             print(f"Error in keep-alive mail: {e}")
-            await asyncio.sleep(30)
-            
+            await asyncio.sleep(time_interval/2)
+
 async def checker():
 
     while True:
